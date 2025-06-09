@@ -37,5 +37,9 @@ spec:
               port: 3000
             initialDelaySeconds: 30
             periodSeconds: 10
-            failureThreshold: 3                  
+            failureThreshold: 3      
+
+ #az aks get-credentials --resource-group aks-rg --name myakscluster      run this command after terraform apply and infrastructure is created.
+      # or  run before kubectl apply. This command will cerate kubeconfig file
+
 
