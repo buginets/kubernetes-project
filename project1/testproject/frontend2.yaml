@@ -23,5 +23,19 @@ spec:
             - name: PORT
               value: "3000"
             - name: API_HOST
-              value: "http://4.236.40.1/api"  # Replace <external-ip> after deployment
+              value: "http://4.236.40.1"  # Replace <external-ip> after deployment
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 3                  
 

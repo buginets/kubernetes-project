@@ -40,3 +40,24 @@ spec:
               value: "mysql-0.mysql-service"
             - name: DBPORT
               value: "3306"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 30     # wait 10s after container starts
+            periodSeconds: 5            # check every 5s
+            failureThreshold: 3         # 3 failed checks = not ready
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 30     # wait 30s before first check
+            periodSeconds: 10           # check every 10s
+            failureThreshold: 3  
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"                           

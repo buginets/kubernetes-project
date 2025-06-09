@@ -20,7 +20,7 @@ spec:
       initContainers:
         - name: clean-mysql-dir
           image: alpine
-          command: ["sh", "-c", "rm -rf /var/lib/mysql/lost+found"]
+          command: ["sh", "-c", "rm -rf /var/lib/mysql/*"]
           volumeMounts:
             - name: mysql-persistent-storage
               mountPath: /var/lib/mysql
