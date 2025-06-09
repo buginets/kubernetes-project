@@ -1,0 +1,83 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+  labels:
+    app: mysql
+spec:
+  ports:
+    - port: 3306
+      name: mysql
+  clusterIP: None
+  selector:
+    app: mysql
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mysql
+spec:
+  serviceName: mysql
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+  
+      terminationGracePeriodSeconds: 10
+      initContainers:
+        - name: clean-mysql-dir
+          image: alpine
+          command: ["sh", "-c", "rm -rf /var/lib/mysql/lost+found"]
+          volumeMounts:
+            - name: mysql-persistent-storage
+              mountPath: /var/lib/mysql
+
+      containers:
+        - name: mysql
+          image: mysql:5.7
+          ports:
+            - containerPort: 3306
+              name: mysql
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: dotfile-secret
+                  key: DBPASS
+            - name: MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: dotfile-secret
+                  key: DBUSER
+            - name: MYSQL_PASSWORD           # <---- add this!
+              valueFrom:
+                secretKeyRef:
+                  name: dotfile-secret
+                  key: DBPASS
+
+            - name: MYSQL_DATABASE
+              value: hello
+          volumeMounts:
+            - name: mysql-persistent-storage
+              mountPath: /var/lib/mysql
+          # readinessProbe:
+          #   exec:
+          #     command: ["mysqladmin", "ping", "-h", "127.0.0.1"]
+          #   initialDelaySeconds: 15
+          #   periodSeconds: 10
+    
+  volumeClaimTemplates:
+    - metadata:
+        name: mysql-persistent-storage
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: "managed-csi"
+        resources:
+          requests:
+            storage: 1Gi

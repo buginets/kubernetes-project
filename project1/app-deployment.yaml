@@ -1,37 +1,51 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: my-nginx
+  name: my-node-app
   labels:
-    app: nginx
+    app: nodejs
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: nginx
+      app: nodejs
   template:
     metadata:
       labels:
-        app: nginx
+        app: nodejs
     spec:
       containers:
-      - name: nginx
-        image: nginx:latest
+      - name: nodejs
+        image: buginets/node-js-api
+        env:
+        - name: DBPASS
+          valueFrom:
+            secretKeyRef:
+              name: dotfile-secret
+              key: DBPASS
+        - name: DBUSER
+          valueFrom:
+            secretKeyRef:
+              name: dotfile-secret
+              key: DBUSER            
         ports:
-        - containerPort: 80
+        - containerPort: 3001
+        envFrom:
+        - configMapRef:
+            name: my-node-config
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: nginx-service
+  name: nodejs-service
 spec:
   selector:
-    app: nginx
+    app: nodejs
   type: LoadBalancer
   ports:
     - protocol: TCP
       port: 80
-      targetPort: 80
+      targetPort: 3001
 
       #az aks get-credentials --resource-group aks-rg --name myakscluster      run this command after terraform apply and infrastructure is created.
       # or  run before kubectl apply. This command will cerate kubeconfig file

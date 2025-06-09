@@ -23,6 +23,8 @@ resource "azurerm_subnet" "subnet" {
   address_prefixes     = ["10.1.1.0/24"]
 }
 
+
+
 resource "azurerm_network_security_group" "aks_nsg" {
   name                = "aks-nsg"
   location            = azurerm_resource_group.rg.location
@@ -72,3 +74,6 @@ resource "azurerm_kubernetes_cluster" "aks" {
     network_policy    = "azure"
   }
 }
+
+
+
