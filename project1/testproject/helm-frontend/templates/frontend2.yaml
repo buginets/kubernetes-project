@@ -1,29 +1,40 @@
 
 # 7. Frontend Deployment
 apiVersion: apps/v1
-kind: Deployment
+kind: {{ .Values.app_kind }}
 metadata:
-  name: frontend-app
+  name: {{ .Values.app_name }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: frontend-app
+      app: {{ .Values.app_name }}
   template:
     metadata:
       labels:
-        app: frontend-app
+        app: {{ .Values.app_name }}
     spec:
       containers:
-        - name: frontend-app
-          image: buginets/node-js-web  # Replace with your image
+        - name: {{ .Values.app_name }}
+          image: {{ .Values.cont_image }} 
           ports:
             - containerPort: 3000
           env:
             - name: PORT
-              value: "3000"
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.configMap_name }}
+                  key: PORT
             - name: API_HOST
-              value: "http://4.236.40.1"  # Replace <external-ip> after deployment
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.configMap_name }}
+                  key: API_HOST            
+          # env:
+          #   - name: PORT
+          #     value: "3000"
+          #   - name: API_HOST
+          #     value: "http://4.236.40.1"  # Replace <external-ip> after deployment
           readinessProbe:
             httpGet:
               path: /health

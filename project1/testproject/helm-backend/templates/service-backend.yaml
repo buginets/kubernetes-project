@@ -1,0 +1,12 @@
+# 4. Backend Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.svc_name }}
+spec:
+  selector:
+    app: {{ .Values.app_name }}
+  ports:
+    - port: {{ .Values.svc_port }}
+      targetPort: {{ .Values.cont_port }}
+  type: {{ .Values.svc_type }}

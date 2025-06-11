@@ -16,7 +16,7 @@ spec:
       labels:
         app: {{ .Values.app_name }}
     spec:
-      terminationGracePeriodSeconds: {{ .Values.term_grace-prd_sec }}
+      terminationGracePeriodSeconds: {{ .Values.term_grace_prd_sec }}
       initContainers:
         - name: clean-mysql-dir
           image: alpine

@@ -1,0 +1,31 @@
+
+
+app_kind: Deployment
+app_name: frontend-app
+cont_image: buginets/node-js-web 
+
+
+
+
+  #Config file
+configMap_name: frontend-config  
+
+# secrte file
+kind: Secret
+secret_name: mysql-secret3
+sec_type: Opaque
+
+# service file
+svc_name: frontend-service
+svc_port: 80
+svc_target_port: 3000
+svc_type: ClusterIP
+
+# Ingress
+
+ing_name: app-ingress
+ing_class_name: nginx
+path_type: Prefix
+svc_backend_name: my-app-service
+
+

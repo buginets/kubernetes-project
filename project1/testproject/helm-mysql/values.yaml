@@ -3,7 +3,7 @@
    
 depl_kind: StatefulSet
 app_name: mysql
-term_grace-prd_sec: 30
+term_grace_prd_sec: 30
 vlm_mnt_name: mysql-persistent-storage
 vlm_mnt_path: /var/lib/mysql
 mysql_img_tag: 5.7

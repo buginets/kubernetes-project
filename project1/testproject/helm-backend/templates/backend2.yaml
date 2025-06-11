@@ -1,0 +1,63 @@
+# 5. Backend Deployment
+apiVersion: apps/v1
+kind: {{ .Values.depl_kind }}
+metadata:
+  name: {{ .Values.app_name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.app_name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.app_name }}
+    spec:
+      containers:
+        - name: {{ .Values.app_name }}
+          image: {{ .Values.cont_image }}
+          ports:
+            - containerPort: {{ .Values.cont_port }}
+          env:
+            - name: PORT
+              value: "8080"
+            - name: DB
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secret_backend_name }}
+                  key: MYSQL_DATABASE
+            - name: DBUSER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secret_backend_name }}
+                  key: MYSQL_USER
+            - name: DBPASS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secret_backend_name }}
+                  key: MYSQL_PASSWORD
+            - name: DBHOST
+              value: "mysql-0.mysql-service"
+            - name: DBPORT
+              value: "{{ .Values.db_port }}"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.cont_port }}
+            initialDelaySeconds: {{ .Values.init_delay_sec }}    # wait 10s after container starts
+            periodSeconds: {{ .Values.period_sec }}           # check every 5s
+            failureThreshold: {{ .Values.fail_tresh }}        # 3 failed checks = not ready
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.cont_port }}
+            initialDelaySeconds: {{ .Values.init_delay_sec }}      # wait 30s before first check
+            periodSeconds: 10           # check every 10s
+            failureThreshold: {{ .Values.fail_tresh }}  
+          resources:
+            requests:
+              memory: {{ .Values.request_memory }}
+              cpu: {{ .Values.request_cpu }}
+            limits:
+              memory: {{ .Values.limit_memory }}
+              cpu: {{ .Values.limit_cpu }}                          

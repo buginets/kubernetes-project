@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.configMap_name }}
+data:
+  PORT: "3000"
+  API_HOST: "http://4.236.0.46"  # Replace with backend ingress/service URL

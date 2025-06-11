@@ -1,0 +1,24 @@
+depl_kind: Deployment
+app_name: my-app
+cont_image: buginets/node-js-api 
+cont_port: 8080
+db_port: 3306
+init_delay_sec: 30
+period_sec: 5
+fail_tresh: 3
+request_memory: "128Mi"
+request_cpu: "100m"
+limit_memory: "512Mi"
+limit_cpu: "500m" 
+
+   # service file 
+svc_name: my-app-service
+svc_port: 80
+svc_type: ClusterIP
+
+
+
+
+    # secret file
+secret_backend_name:  mysql-secret2
+sec_type: Opaque
