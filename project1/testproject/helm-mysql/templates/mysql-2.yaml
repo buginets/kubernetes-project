@@ -1,65 +1,65 @@
 apiVersion: apps/v1
-kind: StatefulSet
+kind: {{ .Values.depl_kind }}
 metadata:
-  name: mysql
+  name: {{ .Values.app_name }}
 spec:
-  serviceName: mysql-service
+  serviceName: {{ .Values.service_name }}
   replicas: 1
   selector:
     matchLabels:
-      app: mysql
+      app: {{ .Values.app_name }}
   persistentVolumeClaimRetentionPolicy:
     whenDeleted: Delete
     whenScaled: Delete
   template:
     metadata:
       labels:
-        app: mysql
+        app: {{ .Values.app_name }}
     spec:
-      terminationGracePeriodSeconds: 30
+      terminationGracePeriodSeconds: {{ .Values.term_grace-prd_sec }}
       initContainers:
         - name: clean-mysql-dir
           image: alpine
           command: ["sh", "-c", "rm -rf /var/lib/mysql/*"]
           volumeMounts:
-            - name: mysql-persistent-storage
-              mountPath: /var/lib/mysql
+            - name: {{ .Values.vlm_mnt_name }}
+              mountPath: {{ .Values.vlm_mnt_path }}
       containers:
-        - name: mysql
-          image: mysql:5.7
+        - name: {{ .Values.app_name }}
+          image: {{ .Values.app_name }}:{{ .Values.mysql_img_tag }}
           ports:
             - containerPort: 3306
-              name: mysql
+              name: {{ .Values.app_name }}
           env:
             - name: MYSQL_ROOT_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: mysql-secret
+                  name: {{ .Values.secret_file_name }}
                   key: MYSQL_PASSWORD
             - name: MYSQL_DATABASE
               valueFrom:
                 secretKeyRef:
-                  name: mysql-secret
+                  name: {{ .Values.secret_file_name }}
                   key: MYSQL_DATABASE
             - name: MYSQL_USER
               valueFrom:
                 secretKeyRef:
-                  name: mysql-secret
+                  name: {{ .Values.secret_file_name }}
                   key: MYSQL_USER
             - name: MYSQL_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: mysql-secret
+                  name: {{ .Values.secret_file_name }}
                   key: MYSQL_PASSWORD
           volumeMounts:
-            - name: mysql-persistent-storage
-              mountPath: /var/lib/mysql
+            - name: {{ .Values.vlm_mnt_name }}
+              mountPath: {{ .Values.vlm_mnt_path }}
   volumeClaimTemplates:
     - metadata:
-        name: mysql-persistent-storage
+        name: {{ .Values.vlm_mnt_name }}
       spec:
         accessModes: ["ReadWriteOnce"]
-        storageClassName: "managed-csi"
+        storageClassName: {{ .Values.storage_Class }}
         resources:
           requests:
-            storage: 1Gi
+            storage: {{ .Values.storage_size }}

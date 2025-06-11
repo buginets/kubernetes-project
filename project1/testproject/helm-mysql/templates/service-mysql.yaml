@@ -1,0 +1,13 @@
+# 2. Headless MySQL Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.service_name }}
+spec:
+  ports:
+    - port: {{ .Values.mysql_svc_port }}
+      targetPort: {{ .Values.mysql_svc_port }}
+      name: {{ .Values.app_name }}
+  clusterIP: None
+  selector:
+    app: {{ .Values.app_name }}
