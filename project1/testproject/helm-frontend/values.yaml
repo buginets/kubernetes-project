@@ -4,6 +4,9 @@ app_kind: Deployment
 app_name: frontend-app
 cont_image: buginets/node-js-web 
 
+# Strategy 
+rolling_update_max_unavailable: 50%
+rolling_update_max_surge: 50%
 
 
 
