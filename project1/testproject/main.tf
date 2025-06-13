@@ -75,5 +75,75 @@ resource "azurerm_kubernetes_cluster" "aks" {
   }
 }
 
+resource "null_resource" "get_kubeconfig" {
+  depends_on = [azurerm_kubernetes_cluster.aks]
+
+  provisioner "local-exec" {
+    command = "az aks get-credentials --resource-group ${azurerm_kubernetes_cluster.aks.resource_group_name} --name ${azurerm_kubernetes_cluster.aks.name} --overwrite-existing"
+  }
+}
+
+
+provider "kubernetes" {
+  host                   = azurerm_kubernetes_cluster.aks.kube_config[0].host
+  client_certificate     = base64decode(azurerm_kubernetes_cluster.aks.kube_config[0].client_certificate)
+  client_key             = base64decode(azurerm_kubernetes_cluster.aks.kube_config[0].client_key)
+  cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.aks.kube_config[0].cluster_ca_certificate)
+
+  
+}
+
+provider "helm" {
+  kubernetes {
+    host                   = azurerm_kubernetes_cluster.aks.kube_config[0].host
+    client_certificate     = base64decode(azurerm_kubernetes_cluster.aks.kube_config[0].client_certificate)
+    client_key             = base64decode(azurerm_kubernetes_cluster.aks.kube_config[0].client_key)
+    cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.aks.kube_config[0].cluster_ca_certificate)
+  }
+
+  
+}
+
+
+resource "helm_release" "nginx_ingress" {
+  name       = "nginx-ingress"
+  repository = "https://kubernetes.github.io/ingress-nginx"
+  chart      = "ingress-nginx"
+  namespace  = "default"
+  version    = "4.10.0"
+
+  values = [<<EOF
+controller:
+  service:
+    type: LoadBalancer
+EOF
+  ]
+
+  depends_on = [null_resource.get_kubeconfig]
+}
+resource "helm_release" "mysql" {
+  name       = "mysql"
+  chart      = "${path.module}/helm-mysql"
+  namespace  = "default"
+  create_namespace = false
+  depends_on = [helm_release.nginx_ingress]
+}
+
+resource "helm_release" "backend" {
+  name       = "backend"
+  chart      = "${path.module}/helm-backend"
+  namespace  = "default"
+  create_namespace = false
+  depends_on = [helm_release.mysql]
+}
+
+resource "helm_release" "frontend" {
+  name       = "frontend"
+  chart      = "${path.module}/helm-frontend"
+  namespace  = "default"
+  create_namespace = false
+  depends_on = [helm_release.backend]
+}
+
 
 
