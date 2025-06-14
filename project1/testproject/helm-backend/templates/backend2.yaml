@@ -4,7 +4,7 @@ kind: {{ .Values.depl_kind }}
 metadata:
   name: {{ .Values.app_name }}
 spec:
-  replicas: 1
+  replicas: 2
   strategy:
     type: RollingUpdate
     rollingUpdate:
